@@ -13,6 +13,8 @@ const {
     codeBlockDebugger,
     fixBadHTML,
     fixEmbeds,
+    cleanupParagraphAndHeaderTags,
+    fixLinkButtons,
 } = require("./articleCleanup");
 
 const unified = require("unified");
@@ -21,34 +23,56 @@ const rehype2remark = require("rehype-remark");
 const stringify = require("remark-stringify");
 const imageType = require("image-type");
 
-// includes all sorts of edge cases and weird stuff
-processExport("test-wordpress-dump.xml");
-// full dump
-// processExport("ageekwithahat.wordpress.2020-08-22 (1).xml");
+processExport([
+    {
+        path: "in-common.xml",
+        name: "common"
+    },
+    {
+        path: "in-edt.xml",
+        name: "edt"
+    },
+    {
+        path: "in-ambition.xml",
+        name: "ambition"
+    },
+    {
+        path: "in-teachfirst.xml",
+        name: "teachfirst"
+    },
+    {
+        path: "in-ucl.xml",
+        name: "ucl"
+    }
+]);
 
-function processExport(file) {
-    const parser = new xml2js.Parser();
+function processExport(files) {
+    files.forEach((file) => {
+        const { path, name } = file
+        const parser = new xml2js.Parser();
+        const outPath = `out-${name}`
 
-    fs.readFile(file, function (err, data) {
-        if (err) {
-            return console.log("Error: " + err);
-        }
-
-        parser.parseString(data, function (err, result) {
+        fs.readFile(path, function (err, data) {
             if (err) {
-                return console.log("Error parsing xml: " + err);
+                return console.log("Error: " + err);
             }
-            console.log("Parsed XML");
-
-            const posts = result.rss.channel[0].item;
-
-            fs.mkdir("out", function () {
-                posts
-                    .filter((p) => p["wp:post_type"][0] === "post")
-                    .forEach(processPost);
+    
+            parser.parseString(data, function (err, result) {
+                if (err) {
+                    return console.log("Error parsing xml: " + err);
+                }
+                console.log("Parsed XML");
+    
+                const posts = result.rss.channel[0].item;
+    
+                fs.mkdir(outPath, function () {
+                    posts
+                        .filter((p) => p["wp:post_type"][0] === "page")
+                        .forEach((p) => processPost(p, outPath));
+                });
             });
         });
-    });
+    })
 }
 
 function constructImageName({ urlParts, buffer }) {
@@ -63,7 +87,7 @@ function constructImageName({ urlParts, buffer }) {
     return `${pathParts.name}.${ext}`;
 }
 
-async function processImage({ url, postData, images, directory }) {
+async function processImage({ url, postData, images, directory, outPath }) {
     const cleanUrl = htmlentities.decode(url);
 
     if (cleanUrl.startsWith("./img")) {
@@ -74,7 +98,7 @@ async function processImage({ url, postData, images, directory }) {
 
     const urlParts = new URL(cleanUrl);
 
-    const filePath = `out/${directory}/img`;
+    const filePath = `${outPath}/${directory}/img`;
 
     try {
         const response = await downloadFile(cleanUrl);
@@ -100,7 +124,7 @@ async function processImage({ url, postData, images, directory }) {
     return [postData, images];
 }
 
-async function processImages({ postData, directory }) {
+async function processImages({ postData, directory, outPath }) {
     const patt = new RegExp('(?:src="(.*?)")', "gi");
     let images = [];
 
@@ -121,6 +145,7 @@ async function processImages({ postData, directory }) {
                     postData,
                     images,
                     directory,
+                    outPath
                 });
             } catch (err) {
                 console.log("ERROR PROCESSING IMAGE", match);
@@ -131,7 +156,7 @@ async function processImages({ postData, directory }) {
     return [postData, images];
 }
 
-async function processPost(post) {
+async function processPost(post, outPath) {
     console.log("Processing Post");
 
     const postTitle =
@@ -151,16 +176,17 @@ async function processPost(post) {
     console.log("Post slug: " + slug);
 
     // takes the longest description candidate
+    const metadata = post["wp:postmeta"] ? post["wp:postmeta"]: []
     const description = [
         post.description,
-        ...post["wp:postmeta"].filter(
+        ...metadata.filter(
             (meta) =>
                 meta["wp:meta_key"][0].includes("metadesc") ||
                 meta["wp:meta_key"][0].includes("description")
-        ),
+        ) 
     ].sort((a, b) => b.length - a.length)[0];
 
-    const heroURLs = post["wp:postmeta"]
+    const heroURLs = metadata
         .filter(
             (meta) =>
                 meta["wp:meta_key"][0].includes("opengraph-image") ||
@@ -175,12 +201,12 @@ async function processPost(post) {
     let fname = `index.mdx`;
 
     try {
-        fs.mkdirSync(`out/${directory}`);
-        fs.mkdirSync(`out/${directory}/img`);
+        fs.mkdirSync(`${outPath}/${directory}`);
+        fs.mkdirSync(`${outPath}/${directory}/img`);
     } catch (e) {
         directory = directory + "-2";
-        fs.mkdirSync(`out/${directory}`);
-        fs.mkdirSync(`out/${directory}/img`);
+        fs.mkdirSync(`${outPath}/${directory}`);
+        fs.mkdirSync(`${outPath}/${directory}/img`);
     }
 
     //Merge categories and tags into tags
@@ -198,7 +224,7 @@ async function processPost(post) {
         });
     }
 
-    [postData, images] = await processImages({ postData, directory });
+    [postData, images] = await processImages({ postData, directory, outPath });
 
     heroImage = images.find((img) => !img.endsWith("gif"));
 
@@ -213,6 +239,8 @@ async function processPost(post) {
             .use(fixEmbeds)
             .use(rehype2remark)
             .use(cleanupShortcodes)
+            .use(cleanupParagraphAndHeaderTags)
+            .use(fixLinkButtons)
             .use(stringify, {
                 fences: true,
                 listItemIndent: 1,
@@ -223,6 +251,7 @@ async function processPost(post) {
                 if (err) {
                     reject(err);
                 } else {
+                    // actual mdx string
                     let content = markdown.contents;
                     content = content.replace(
                         /(?<=https?:\/\/.*)\\_(?=.*\n)/g,
@@ -266,7 +295,7 @@ async function processPost(post) {
     frontmatter.push("");
 
     fs.writeFile(
-        `out/${directory}/${fname}`,
+        `${outPath}/${directory}/${fname}`,
         frontmatter.join("\n") + markdown,
         function (err) {}
     );

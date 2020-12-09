@@ -325,10 +325,48 @@ function fixEmbeds() {
     };
 }
 
+// ============================ Custom conversions ============================
+
+function cleanupParagraphAndHeaderTags() {
+    return (tree) => {
+        visit(tree, "html", (node) => {
+            if (node.value === "<!-- wp:paragraph -->") {
+                node.value = ""
+            }
+            if (node.value === "<!-- /wp:paragraph -->") {
+                node.value = ""
+            }
+            if (node.value === "<!-- wp:heading -->") {
+                node.value = ""
+            }
+            if (node.value === "<!-- /wp:heading -->") {
+                node.value = ""
+            }
+        });
+    };
+}
+
+function fixLinkButtons() {
+    const buttnRegex = /<!-- wp:acf\/button ([\s\S]*?) \/-->/
+    return (tree) => {
+        visit(tree, "html", (node, index, parent) => {
+            if (node.value) {
+                const match = buttnRegex.exec(node.value)
+                if (match) {
+                    const jsonValue = JSON.parse(match[1])
+                    node.value = `{button}[${jsonValue.data.button_text}](${jsonValue.data.link}){/button}`
+                }
+            }
+        });
+    };
+}
+
 module.exports = {
     cleanupShortcodes,
     fixCodeBlocks,
     codeBlockDebugger,
     fixEmbeds,
     fixBadHTML,
+    cleanupParagraphAndHeaderTags,
+    fixLinkButtons,
 };

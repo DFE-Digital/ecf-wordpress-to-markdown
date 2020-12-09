@@ -4,6 +4,7 @@ lib-cov
 *.csv
 *.dat
 *.out
+*.out*
 *.pid
 *.gz
 
@@ -15,5 +16,8 @@ npm-debug.log
 node_modules
 export.xml
 out/*
+out*/*
 img/*
 .DS_Store
+
+in-*
