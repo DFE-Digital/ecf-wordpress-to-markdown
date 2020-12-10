@@ -12,10 +12,8 @@
     },
     "scripts": {
         "clean": "rm -rf out*",
-        "convert": "yarn clean && node convert.js",
-        "memSize": "export NODE_OPTIONS=--max_old_space_size=4096",
-        "start": "memSize && gatsby develop",
-        "build": "memSize && gatsby build"
+        "convert": "yarn clean && node --es-module-specifier-resolution=node convert.js",
+        "lint": "eslint --fix --ext .js,.mjs ."
     },
     "repository": {
         "type": "git",
@@ -43,5 +41,11 @@
         "unist-util-visit": "^2.0.3",
         "xml2js": "~0.4.23"
     },
-    "main": "convert.js"
+    "main": "convert.js",
+    "type": "module",
+    "devDependencies": {
+        "eslint": "^7.15.0",
+        "eslint-config-airbnb-base": "^14.2.1",
+        "eslint-plugin-import": "^2.22.1"
+    }
 }

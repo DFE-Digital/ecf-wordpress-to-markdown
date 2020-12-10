@@ -12,11 +12,7 @@ We will use it to translate [the NERO site](https://www.early-career-framework.e
 
 If you convert the files and open some of them, you will notice are not fully converted - in particular they have a bunch of commented out wordpress tags. Thats where hard work comes in. We will be writing more components in, and handling them in Rails using [govspeak](https://github.com/alphagov/govspeak). We will probably need to add some components to it though. 
 
-You can find translating a wordpress button into govspeak button in `articleCleanup` under 
-```
-// ============================ Custom conversions ============================
-```
-line - I know, the structure is a bit of a mess, we might improve it as we go along.
+You can find translating a wordpress button into govspeak button in `parsers/handleWordpressComponents`.
 
 ### License
 
