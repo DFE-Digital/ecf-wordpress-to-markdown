@@ -1,6 +1,6 @@
 import visit from 'unist-util-visit';
 
-export function fixLinkButtons() {
+export function fixLinkButtons () {
   // TODO: Different styles based on _style_as_secondary_button
   const buttnRegex = /<!-- wp:acf\/button ([\s\S]*?) \/-->/;
   return (tree) => {
@@ -9,7 +9,11 @@ export function fixLinkButtons() {
         const match = buttnRegex.exec(node.value);
         if (match) {
           const jsonValue = JSON.parse(match[1]);
-          node.value = `{button}[${jsonValue.data.button_text}](${jsonValue.data.link}){/button}`;
+          if (jsonValue.data.style_as_secondary_button === '1') {
+            node.value = `{button secondary}[${jsonValue.data.button_text}](${jsonValue.data.link}){/button}`;
+          } else {
+            node.value = `{button}[${jsonValue.data.button_text}](${jsonValue.data.link}){/button}`;
+          }
         }
       }
     });
