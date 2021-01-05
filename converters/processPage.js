@@ -14,7 +14,7 @@ import {
   fixEmbeds,
 } from '../parsers/forkedMagicalParsers';
 import { cleanupParagraphAndHeaderTags } from '../parsers/cleanupWordpressTags';
-import { fixLinkButtons } from '../parsers/handleWordpressComponents';
+import { fixLinkButtons, fixAccordions } from '../parsers/handleWordpressComponents';
 import { processImage, processImages } from './processImages';
 
 const { format } = pkg;
@@ -33,6 +33,7 @@ function parseMarkdown(postData) {
       .use(cleanupShortcodes)
       .use(cleanupParagraphAndHeaderTags)
       .use(fixLinkButtons)
+      .use(fixAccordions)
       .use(stringify, {
         fences: true,
         listItemIndent: 1,
