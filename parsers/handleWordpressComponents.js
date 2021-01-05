@@ -53,7 +53,7 @@ export function fixYoutubeEmbeddings() {
         const match = youtubeRegex.exec(node.value);
         if (match) {
           const jsonValue = JSON.parse(match[1]);
-          node.value = `$YoutubeVideo(${jsonValue.url})$YoutubeVideoEnd`;
+          node.value = `$YoutubeVideo(${jsonValue.url})$EndYoutubeVideo`;
         }
       }
     });
