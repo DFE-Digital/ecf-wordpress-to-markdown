@@ -44,3 +44,18 @@ export function fixAccordions() {
     });
   };
 }
+
+export function fixYoutubeEmbeddings() {
+  const youtubeRegex = /<!-- wp:core-embed\/youtube ([\s\S]*?) -->/;
+  return (tree) => {
+    visit(tree, 'html', (node,) => {
+      if (node.value) {
+        const match = youtubeRegex.exec(node.value);
+        if (match) {
+          const jsonValue = JSON.parse(match[1]);
+          node.value = `$YoutubeVideo(${jsonValue.url})$YoutubeVideoEnd`;
+        }
+      }
+    });
+  };
+}
