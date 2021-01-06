@@ -1,6 +1,6 @@
 import visit from 'unist-util-visit';
 
-export function fixLinkButtons () {
+export function fixLinkButtons() {
   // TODO: Different styles based on _style_as_secondary_button
   const buttnRegex = /<!-- wp:acf\/button ([\s\S]*?) \/-->/;
   return (tree) => {
@@ -48,7 +48,7 @@ export function fixAccordions() {
 export function fixYoutubeEmbeddings() {
   const youtubeRegex = /<!-- wp:core-embed\/youtube ([\s\S]*?) -->/;
   return (tree) => {
-    visit(tree, 'html', (node,) => {
+    visit(tree, 'html', (node) => {
       if (node.value) {
         const match = youtubeRegex.exec(node.value);
         if (match) {

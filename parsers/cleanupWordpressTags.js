@@ -8,7 +8,10 @@ export function cleanupParagraphAndHeaderTags() {
     '<!-- wp:heading {"level":3} -->',
     '<!-- wp:heading {"level":4} -->',
     '<!-- /wp:heading -->',
-    '<!-- /wp:core-embed/youtube -->'];
+    '<!-- /wp:core-embed/youtube -->',
+    '<!-- wp:quote -->',
+    '<!-- /wp:quote -->',
+  ];
 
   const startPatternsToRemove = [
     'https://www.youtube.com/watch?',
