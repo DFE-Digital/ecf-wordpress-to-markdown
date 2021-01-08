@@ -6,6 +6,8 @@ import util from 'util';
 
 export function fixBadHTML(html) {
   html = html.replace(/(\r?\n){2}/g, '<p></p>');
+  html = html.replace(/ <\/em>/g, '</em> ');
+  html = html.replace(/ <\/strong>/g, '</strong> ');
   return html;
 }
 
