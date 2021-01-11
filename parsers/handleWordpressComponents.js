@@ -34,6 +34,21 @@ export function fixHighlights() {
   };
 }
 
+export function fixActionPrompt() {
+  const actionPromptRegex = /<!-- wp:acf\/action-prompt ([\s\S]*?) \/-->/;
+  return (tree) => {
+    visit(tree, 'html', (node) => {
+      if (node.value) {
+        const match = actionPromptRegex.exec(node.value);
+        if (match) {
+          const jsonValue = JSON.parse(match[1]);
+          node.value = `$CTA\n${jsonValue.data.action_prompt_content}\n$CTA`;
+        }
+      }
+    });
+  };
+}
+
 export function fixAccordions() {
   const accordionRegex = /<!-- wp:acf\/accordion ([\s\S]*?) \/-->/;
   return (tree) => {
