@@ -16,6 +16,7 @@ import {
 import { cleanupParagraphAndHeaderTags } from '../parsers/cleanupWordpressTags';
 import {
   fixLinkButtons, fixAccordions, fixYoutubeEmbeddings, fixHighlights, fixActionPrompt,
+  findImageData, fixImages,
 } from '../parsers/handleWordpressComponents';
 import { processImage, processImages } from './processImages';
 
@@ -31,9 +32,11 @@ function parseMarkdown(postData) {
       })
       .use(fixCodeBlocks)
       .use(fixEmbeds)
+      .use(findImageData)
       .use(rehype2remark)
       .use(cleanupShortcodes)
       .use(fixLinkButtons)
+      .use(fixImages)
       .use(fixAccordions)
       .use(fixActionPrompt)
       .use(fixYoutubeEmbeddings)

@@ -74,6 +74,55 @@ export function fixAccordions() {
   };
 }
 
+const findCaptionText = (figureCaptionNodes) => {
+  let figCaptionValue = '';
+  const hasFigCapText = figureCaptionNodes.filter((o) => o.type === 'text');
+  if (hasFigCapText.length > 0) {
+    figCaptionValue = hasFigCapText[0].value;
+  } else {
+    const string = findCaptionText(figureCaptionNodes[0].children);
+    if (string) {
+      figCaptionValue += string;
+    }
+  }
+  return figCaptionValue;
+};
+
+export function findImageData() {
+  return (tree) => {
+    visit(tree, (node) => node.type === 'element' && node.children.some((n) => n.tagName === 'img'), (node) => {
+      const arrayOfImageData = node.children.filter((imageData) => imageData.tagName === 'img');
+      const { src, alt } = arrayOfImageData[0].properties;
+
+      const figureCaptionNodes = node.children.filter((element) => element.tagName === 'figcaption');
+
+      let captionText = '';
+      if (figureCaptionNodes.length > 0) {
+        captionText = findCaptionText(figureCaptionNodes);
+      }
+
+      const govSpeakImageData = `$Alt\n${alt}\n$EndAlt\n$URL\n${src}\n$EndURL\n$Caption\n${captionText}\n$EndCaption`;
+
+      node.type = 'element';
+      node.tagName = 'div';
+      node.children = [{
+        type: 'text', value: govSpeakImageData,
+      }];
+    });
+  };
+}
+
+export function fixImages() {
+  return (tree) => {
+    visit(tree, 'text', (node) => {
+      if (node.value.includes('$EndAlt')) {
+        const govSpeakImageData = node.value;
+        node.value = `$Figure\n${govSpeakImageData}\n$EndFigure`;
+      }
+    });
+  };
+}
+
 export function fixYoutubeEmbeddings() {
   const youtubeRegex = /<!-- wp:core-embed\/youtube ([\s\S]*?) -->/;
   return (tree) => {
