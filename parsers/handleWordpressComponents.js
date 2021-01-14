@@ -74,13 +74,13 @@ export function fixAccordions() {
   };
 }
 
-const findCaptionText = (figureCaption, key) => {
+const findCaptionText = (figureCaptionNodes) => {
   let figCaptionValue = '';
-  const nestedFigCap = figureCaption.filter((o) => o.type === key);
-  if (nestedFigCap.length > 0) {
-    figCaptionValue = nestedFigCap[0].value;
+  const hasFigCapText = figureCaptionNodes.filter((o) => o.type === 'text');
+  if (hasFigCapText.length > 0) {
+    figCaptionValue = hasFigCapText[0].value;
   } else {
-    const string = findCaptionText(figureCaption[0].children, key);
+    const string = findCaptionText(figureCaptionNodes[0].children);
     if (string) {
       figCaptionValue += string;
     }
@@ -92,15 +92,14 @@ export function findImageData() {
   return (tree) => {
     visit(tree, (node) => node.type === 'element' && node.children.some((n) => n.tagName === 'img'), (node) => {
       const arrayOfImageData = node.children.filter((imageData) => imageData.tagName === 'img');
-      const { src } = arrayOfImageData[0].properties;
-      const { alt } = arrayOfImageData[0].properties;
+      const { src, alt } = arrayOfImageData[0].properties;
 
-      const figureCaption = node.children.filter((element) => element.tagName === 'figcaption');
+      const figureCaptionNodes = node.children.filter((element) => element.tagName === 'figcaption');
 
       let captionText = '';
-      if (figureCaption.length > 0) {
-        captionText = findCaptionText(figureCaption, 'text');
-      } else captionText = '';
+      if (figureCaptionNodes.length > 0) {
+        captionText = findCaptionText(figureCaptionNodes);
+      }
 
       const govSpeakImageData = `$Alt\n${alt}\n$EndAlt\n$URL\n${src}\n$EndURL\n$Caption\n${captionText}\n$EndCaption`;
 
