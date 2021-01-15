@@ -20,9 +20,9 @@ export function fixLinkButtons() {
 }
 
 export function fixHighlights() {
-  const highlightRegex = /<!-- wp:acf\/highlight ([\s\S]*?) \/-->/;
+  const highlightRegex = /<!-- wp:acf\/highlight([\s\S]*?)\/-->/;
   return (tree) => {
-    visit(tree, 'html', (node) => {
+    visit(tree, (node) => {
       if (node.value) {
         const match = highlightRegex.exec(node.value);
         if (match) {

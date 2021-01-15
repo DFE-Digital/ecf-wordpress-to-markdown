@@ -2,15 +2,7 @@ import visit from 'unist-util-visit';
 
 export function cleanupParagraphAndHeaderTags() {
   const tagsToRemove = [
-    '<!-- wp:paragraph -->',
-    '<!-- /wp:paragraph -->',
-    '<!-- wp:heading -->',
-    '<!-- wp:heading {"level":3} -->',
-    '<!-- wp:heading {"level":4} -->',
-    '<!-- /wp:heading -->',
     '<!-- /wp:core-embed/youtube -->',
-    '<!-- wp:quote -->',
-    '<!-- /wp:quote -->',
   ];
 
   const startPatternsToRemove = [

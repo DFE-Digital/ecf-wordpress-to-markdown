@@ -5,9 +5,68 @@ import prettier from 'prettier';
 import util from 'util';
 
 export function fixBadHTML(html) {
+  const tagsToRemove = [
+    /<!-- wp:block \{"ref":[0-9]+} \/-->/g,
+
+    /<!-- wp:paragraph -->/g,
+    /<!-- wp:paragraph {"align":"[a-zA-Z]+"} -->/g,
+    /<!-- wp:paragraph {"className":"[a-zA-Z\-]+"} -->/g,
+    /<!-- \/wp:paragraph -->/g,
+    /<!-- \\\/wp:paragraph -->/g,
+
+    /<!-- wp:heading -->/g,
+    /<!-- wp:heading {"level":[0-9]+} -->/g,
+    /<!-- \/wp:heading -->/g,
+    /<!-- \\\/wp:heading -->/g,
+
+    /<!-- wp:quote -->/g,
+    /<!-- wp:quote {"align":"left"} -->/,
+    /<!-- \/wp:quote -->/g,
+    /<!-- \\\/wp:quote -->/g,
+
+    /<!-- wp:list -->/g,
+    /<!-- wp:list {[a-zA-Z":,0-9]+} -->/g,
+    /<!-- \/wp:list -->/g,
+    /<!-- \\\/wp:list -->/g,
+
+    /<!-- wp:table -->/g,
+    /<!-- \/wp:table -->/g,
+    /<!-- \\\/wp:table -->/g,
+
+    /<!-- wp:tadv\/classic-paragraph -->/g,
+    /<!-- \/wp:tadv\/classic-paragraph -->/g,
+    /<!-- \\\/wp:tadv\/classic-paragraph -->/g,
+
+    /<!-- wp:spacer -->/g,
+    /<!-- \/wp:spacer -->/g,
+    /<!-- \\\/wp:spacer -->/g,
+
+    /<!-- wp:separator -->/g,
+    /<!-- \/wp:separator -->/g,
+    /<!-- \\\/wp:separator -->/g,
+
+    /<!-- wp:html -->/g,
+    /<!-- \/wp:html -->/g,
+    /<!-- \\\/wp:html -->/g,
+
+    /<!-- wp:group -->/g,
+    /<!-- \/wp:group -->/g,
+    /<!-- \\\/wp:group -->/g,
+
+    /<!-- wp:image -->/g,
+    /<!-- wp:image {[a-zA-Z":,0-9]+} -->/g,
+    /<!-- \/wp:image -->/g,
+    /<!-- \\\/wp:image -->/g,
+  ];
+
   html = html.replace(/(\r?\n){2}/g, '<p></p>');
   html = html.replace(/ <\/em>/g, '</em> ');
   html = html.replace(/ <\/strong>/g, '</strong> ');
+
+  tagsToRemove.forEach((tag) => {
+    html = html.replace(tag, '');
+  });
+
   return html;
 }
 
